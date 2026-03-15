@@ -52,6 +52,8 @@ async function fetchWeather(lat: number, lng: number): Promise<WeatherData> {
   };
 }
 
+const LOCATION_GRANTED_KEY = "fc_location_granted";
+
 export function useWeather(): UseWeatherReturn {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -69,11 +71,14 @@ export function useWeather(): UseWeatherReturn {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
+          // Remember that permission was granted so we auto-retry next time
+          localStorage.setItem(LOCATION_GRANTED_KEY, "1");
           const data = await fetchWeather(
             pos.coords.latitude,
             pos.coords.longitude,
           );
           setWeather(data);
+          setError(null);
         } catch {
           setError("Weather unavailable");
         } finally {
@@ -83,26 +88,44 @@ export function useWeather(): UseWeatherReturn {
       (err) => {
         setLoading(false);
         if (err.code === err.PERMISSION_DENIED) {
+          localStorage.removeItem(LOCATION_GRANTED_KEY);
           setPermissionDenied(true);
         } else {
           setError("Location unavailable");
         }
       },
-      { timeout: 10000 },
+      { timeout: 15000, enableHighAccuracy: false },
     );
   }, []);
 
-  // Auto-attempt if permission was already granted
+  // Auto-attempt on mount:
+  // 1. Use navigator.permissions if available (desktop/Android)
+  // 2. Fall back to localStorage flag (iOS Safari)
   useEffect(() => {
-    if (!navigator.permissions) return;
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((result) => {
-        if (result.state === "granted") {
-          requestLocation();
-        }
-      })
-      .catch(() => {});
+    if (!navigator.geolocation) return;
+
+    if (navigator.permissions) {
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then((result) => {
+          if (result.state === "granted") {
+            requestLocation();
+          } else if (result.state === "prompt") {
+            // Check localStorage in case the user granted before
+            const prevGranted = localStorage.getItem(LOCATION_GRANTED_KEY);
+            if (prevGranted) requestLocation();
+          }
+        })
+        .catch(() => {
+          // navigator.permissions.query failed (e.g. iOS Safari) — fall back
+          const prevGranted = localStorage.getItem(LOCATION_GRANTED_KEY);
+          if (prevGranted) requestLocation();
+        });
+    } else {
+      // iOS Safari: no permissions API, rely on localStorage flag
+      const prevGranted = localStorage.getItem(LOCATION_GRANTED_KEY);
+      if (prevGranted) requestLocation();
+    }
   }, [requestLocation]);
 
   return { weather, loading, error, permissionDenied, requestLocation };

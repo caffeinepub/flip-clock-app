@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
-import { BottomNav, SidebarNav } from "./components/Navigation";
+import { LocationPermissionModal } from "./components/LocationPermissionModal";
+import { HamburgerNav } from "./components/Navigation";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { AlarmView } from "./views/AlarmView";
@@ -8,29 +9,29 @@ import { ClockView } from "./views/ClockView";
 import { StopwatchView } from "./views/StopwatchView";
 
 function AppInner() {
-  const { theme, activeView } = useAppContext();
+  const { theme, activeView, requestLocation } = useAppContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div
       data-theme={theme}
-      className="flex h-dvh w-screen overflow-hidden"
+      className="flex h-dvh w-screen overflow-hidden relative"
       style={{ background: "oklch(var(--background))" }}
     >
-      {/* Desktop sidebar */}
-      <SidebarNav onOpenSettings={() => setSettingsOpen(true)} />
+      {/* Hamburger nav — visible on all screen sizes */}
+      <HamburgerNav
+        onOpenSettings={() => setSettingsOpen(true)}
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+      />
 
-      {/* Main content area */}
+      {/* Main content area — full width */}
       <main className="flex-1 flex flex-col overflow-hidden min-h-0">
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           {activeView === "clock" && <ClockViewWrapper />}
           {activeView === "alarm" && <AlarmView />}
           {activeView === "stopwatch" && <StopwatchView />}
-        </div>
-
-        {/* Mobile/tablet bottom nav */}
-        <div className="lg:hidden shrink-0">
-          <BottomNav onOpenSettings={() => setSettingsOpen(true)} />
         </div>
       </main>
 
@@ -38,15 +39,18 @@ function AppInner() {
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
+
+      {/* Location permission modal — directly triggers geolocation request */}
+      <LocationPermissionModal onAllow={requestLocation} />
+
       <Toaster />
     </div>
   );
 }
 
-// Clock view fills the entire content area
 function ClockViewWrapper() {
   return (
-    <div className="h-full min-h-[calc(100dvh-65px)] lg:min-h-full flex items-center justify-center">
+    <div className="h-full min-h-dvh flex items-center justify-center">
       <ClockView />
     </div>
   );

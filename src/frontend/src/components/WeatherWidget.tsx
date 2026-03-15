@@ -1,9 +1,14 @@
 import { Wind } from "lucide-react";
-import { useWeather } from "../hooks/useWeather";
+import { useAppContext } from "../context/AppContext";
 
 export function WeatherWidget() {
-  const { weather, loading, error, permissionDenied, requestLocation } =
-    useWeather();
+  const {
+    weather,
+    weatherLoading: loading,
+    weatherError: error,
+    weatherPermissionDenied: permissionDenied,
+    requestLocation,
+  } = useAppContext();
 
   const baseStyle: React.CSSProperties = {
     background: "oklch(var(--foreground) / 0.06)",

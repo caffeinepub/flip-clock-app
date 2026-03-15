@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { type WeatherData, useWeather } from "../hooks/useWeather";
 
 export type Theme =
   | "dark-minimal"
@@ -30,6 +31,12 @@ interface AppState {
   alarms: Alarm[];
   activeView: ActiveView;
   triggeredAlarm: Alarm | null;
+  // Weather (shared across components)
+  weather: WeatherData | null;
+  weatherLoading: boolean;
+  weatherError: string | null;
+  weatherPermissionDenied: boolean;
+  requestLocation: () => void;
   setTheme: (t: Theme) => void;
   setUse24h: (v: boolean) => void;
   setAnimationsEnabled: (v: boolean) => void;
@@ -68,6 +75,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState<ActiveView>("clock");
   const [triggeredAlarm, setTriggeredAlarm] = useState<Alarm | null>(null);
   const [lastTriggered, setLastTriggered] = useState<string>("");
+
+  // Single shared weather instance
+  const {
+    weather,
+    loading: weatherLoading,
+    error: weatherError,
+    permissionDenied: weatherPermissionDenied,
+    requestLocation,
+  } = useWeather();
 
   // Persist settings
   useEffect(() => {
@@ -140,6 +156,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         alarms,
         activeView,
         triggeredAlarm,
+        weather,
+        weatherLoading,
+        weatherError,
+        weatherPermissionDenied,
+        requestLocation,
         setTheme,
         setUse24h,
         setAnimationsEnabled,
