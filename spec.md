@@ -1,32 +1,26 @@
 # Flip Clock App
 
 ## Current State
-New project. No existing frontend or backend logic.
+A flip clock app with clock, alarm, and stopwatch views. The ClockView shows a flip clock and fullscreen toggle. No weather data is displayed.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Flip clock display with CSS flip-card animations for hours, minutes, seconds
-- 5 themes: Dark Minimal, Neon Glow, Vintage Wood, Pastel Light, Cyberpunk
-- Alarm manager: create/delete alarms with labels, time, AM/PM or 24h format, trigger UI
-- Stopwatch: start/pause/reset, lap recording, milliseconds display
-- Bottom tab navigation (Clock, Alarm, Stopwatch) on mobile; sidebar on desktop
-- Settings panel: 12/24h toggle, theme selector, animation toggle
-- Mobile-first responsive layout
+- A weather widget on the ClockView that shows current temperature, weather condition icon/description, and wind speed.
+- Geolocation permission request using the browser's `navigator.geolocation` API.
+- Weather data fetched from the Open-Meteo API (free, no API key needed) using the user's lat/lng.
+- A `useWeather` custom hook that manages geolocation state, permission state, loading, error, and weather data.
+- Weather widget shows a "Allow Location" button if permission has not been granted yet.
+- Weather widget is displayed below the flip clock in the ClockView.
 
 ### Modify
-- N/A
+- `ClockView.tsx`: Add the weather widget below the FlipClock component.
+- `AppContext.tsx`: No changes needed.
 
 ### Remove
-- N/A
+- Nothing removed.
 
 ## Implementation Plan
-1. Create theme system with 5 color palettes stored in a React context
-2. Build FlipCard component with CSS keyframe flip animation
-3. Build FlipClock composed of FlipCard digits for HH:MM:SS
-4. Build ClockView using FlipClock with live time
-5. Build AlarmView: alarm list, add/edit alarm modal, trigger overlay
-6. Build StopwatchView: timer logic, lap list
-7. Build SettingsPanel: theme picker, 12/24h toggle, animation toggle
-8. Build bottom tab bar + desktop sidebar navigation
-9. Wire all views together with a shared app state (theme, format, alarms)
+1. Create `src/frontend/src/hooks/useWeather.ts` — handles geolocation request, calls Open-Meteo API (`https://api.open-meteo.com/v1/forecast?latitude=X&longitude=Y&current=temperature_2m,windspeed_10m,weathercode&wind_speed_unit=mph`), parses WMO weather codes into human-readable conditions, exposes `{ weather, loading, error, permissionState, requestLocation }`.
+2. Create `src/frontend/src/components/WeatherWidget.tsx` — compact widget showing temperature (°C), condition, wind speed; shows "Allow Location" button if no permission; fits the current theme using CSS variables.
+3. Update `ClockView.tsx` to render `<WeatherWidget />` below `<FlipClock />`.

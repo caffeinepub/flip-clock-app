@@ -88,11 +88,11 @@ export function AlarmView() {
 
   return (
     <div
-      className="flex flex-col h-full"
-      style={{ background: "oklch(var(--background))", minHeight: "100%" }}
+      className="flex flex-col h-full min-h-0"
+      style={{ background: "oklch(var(--background))" }}
     >
       <div
-        className="flex items-center justify-between px-6 py-4"
+        className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: "1px solid oklch(var(--border))" }}
       >
         <h2
@@ -113,7 +113,7 @@ export function AlarmView() {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
         {alarms.length === 0 ? (
           <div
             data-ocid="alarm.empty_state"
@@ -250,10 +250,10 @@ export function AlarmView() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-48 overflow-y-scroll">
                       {MINUTES.map((m) => (
                         <SelectItem key={m} value={String(m)}>
-                          {m.toString().padStart(2, "0")}
+                          {m.toString().padStart(2, "00")}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -289,7 +289,7 @@ export function AlarmView() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-48 overflow-y-scroll">
                       {MINUTES.map((m) => (
                         <SelectItem key={m} value={String(m)}>
                           {m.toString().padStart(2, "0")}

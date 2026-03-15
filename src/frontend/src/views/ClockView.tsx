@@ -1,8 +1,40 @@
+import { Maximize2, Minimize2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FlipClock } from "../components/FlipClock";
+import { WeatherWidget } from "../components/WeatherWidget";
 import { useAppContext } from "../context/AppContext";
+
+const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+};
 
 export function ClockView() {
   const { triggeredAlarm, dismissTriggeredAlarm } = useAppContext();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleChange);
+    return () => document.removeEventListener("fullscreenchange", handleChange);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "f" || e.key === "F") {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        toggleFullscreen();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div
@@ -18,6 +50,23 @@ export function ClockView() {
       />
 
       <FlipClock />
+      <WeatherWidget />
+
+      <button
+        type="button"
+        data-ocid="clock.fullscreen.toggle"
+        onClick={toggleFullscreen}
+        title={isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"}
+        className="absolute bottom-4 right-4 p-2 rounded-lg transition-all hover:scale-110 active:scale-95"
+        style={{
+          background: "oklch(var(--foreground) / 0.08)",
+          color: "oklch(var(--foreground) / 0.5)",
+          backdropFilter: "blur(4px)",
+          border: "1px solid oklch(var(--foreground) / 0.1)",
+        }}
+      >
+        {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+      </button>
 
       {triggeredAlarm && (
         <div
