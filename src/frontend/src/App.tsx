@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
-import { LocationPermissionModal } from "./components/LocationPermissionModal";
 import { HamburgerNav } from "./components/Navigation";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { AppProvider, useAppContext } from "./context/AppContext";
@@ -9,7 +8,7 @@ import { ClockView } from "./views/ClockView";
 import { StopwatchView } from "./views/StopwatchView";
 
 function AppInner() {
-  const { theme, activeView, requestLocation } = useAppContext();
+  const { theme, activeView } = useAppContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -39,9 +38,6 @@ function AppInner() {
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
       />
-
-      {/* Location permission modal — directly triggers geolocation request */}
-      <LocationPermissionModal onAllow={requestLocation} />
 
       <Toaster />
     </div>

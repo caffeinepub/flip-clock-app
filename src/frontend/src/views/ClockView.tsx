@@ -1,7 +1,6 @@
 import { Maximize2, Minimize2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FlipClock } from "../components/FlipClock";
-import { WeatherWidget } from "../components/WeatherWidget";
 import { useAppContext } from "../context/AppContext";
 
 const toggleFullscreen = () => {
@@ -50,7 +49,6 @@ export function ClockView() {
       />
 
       <FlipClock />
-      <WeatherWidget />
 
       <button
         type="button"
